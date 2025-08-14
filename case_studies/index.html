@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Network - Organic Topology</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: white;
+            font-family: 'Arial', sans-serif;
+            overflow: auto;
+        }
+        
+        .container {
+            display: flex;
+            gap: 30px;
+            min-height: 100vh;
+        }
+        
+        .network-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        .network-svg {
+            width: 900px;
+            height: 700px;
+            cursor: grab;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(5px);
+        }
+        
+        .network-svg:active {
+            cursor: grabbing;
+        }
+        
+        .controls {
+            width: 320px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            height: fit-content;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .control-section {
+            margin-bottom: 25px;
+        }
+        
+        .control-section h3 {
+            color: #ff6b94;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .node-cluster {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .node-cluster:hover {
+            transform: scale(1.05);
+        }
+        
+        .central-core {
+            fill: url(#coreGradient);
+            stroke: rgba(255, 255, 255, 0.6);
+            stroke-width: 3;
+            filter: url(#glow);
+        }
+        
+        .connection-web {
+            stroke: rgba(255, 255, 255, 0.2);
+            stroke-width: 1;
+            fill: none;
+            opacity: 0.7;
+        }
+        
+        .connection-flow {
+            stroke: rgba(255, 107, 148, 0.6);
+            stroke-width: 2;
+            fill: none;
+            stroke-dasharray: 8,4;
+            animation: flow 4s linear infinite;
+        }
+        
+        @keyframes flow {
+            0% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: 24; }
+        }
+        
+        .fractal-pattern {
+            fill: rgba(139, 69, 255, 0.1);
+            stroke: rgba(139, 69, 255, 0.3);
+            stroke-width: 0.5;
+        }
+        
+        .info-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #ff6b94;
+        }
+        
+        .toggle-btn {
+            background: rgba(255, 107, 148, 0.3);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+            font-size: 12px;
+        }
+        
+        .toggle-btn:hover, .toggle-btn.active {
+            background: rgba(255, 107, 148, 0.7);
+            transform: scale(1.05);
+        }
+        
+        .presence-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 5px 0;
+        }
+        
+        .presence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b94, #8b45ff);
+            transition: width 0.5s ease;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            max-width: 250px;
+            display: none;
+            border: 1px solid rgba(255, 107, 148, 0.5);
+        }
+        
+        .cluster-text {
+            font-size: 10px;
+            font-weight: bold;
+            text-anchor: middle;
+            fill: white;
+            pointer-events: none;
+            text-shadow: 0 0 3px rgba(0,0,0,0.8);
+        }
+        
+        .presence-indicator {
+            fill: rgba(255, 107, 148, 0.8);
+            stroke: white;
+            stroke-width: 1;
+        }
+        
+        .organic-flow {
+            animation: organicPulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes organicPulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.02); }
+        }
+
+        .network-stats {
+            font-size: 12px;
+            color: #ccc;
+            margin: 5px 0;
+        }
+
+        .activity-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff6b94;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        .slider-container {
+            margin: 10px 0;
+        }
+
+        .slider {
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255,255,255,0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ff6b94;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ff6b94;
+            cursor: pointer;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="network-container">
+            <svg class="network-svg" viewBox="0 0 900 700" id="organicNetwork">
+                <defs>
+                    <radialGradient id="coreGradient" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" style="stop-color:rgba(255,107,148,1);stop-opacity:1" />
+                        <stop offset="50%" style="stop-color:rgba(255,107,148,0.8);stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:rgba(255,107,148,0.3);stop-opacity:1" />
+                    </radialGradient>
+                    
+                    <radialGradient id="clusterGradient" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" style="stop-color:rgba(255,107,148,0.8);stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:rgba(255,107,148,0.4);stop-opacity:1" />
+                    </radialGradient>
+
+                    <radialGradient id="secondaryGradient" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" style="stop-color:rgba(139,69,255,0.8);stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:rgba(139,69,255,0.4);stop-opacity:1" />
+                    </radialGradient>
+                    
+                    <filter id="glow">
+                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                        <feMerge> 
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+
+                    <filter id="innerGlow">
+                        <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                        <feMerge> 
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+                
+                <!-- Background organic patterns -->
+                <g id="organicBackground"></g>
+                
+                <!-- Connection web -->
+                <g id="connectionWeb"></g>
+                
+                <!-- Data flows -->
+                <g id="dataFlows"></g>
+                
+                <!-- Node clusters -->
+                <g id="nodeClusters"></g>
+                
+                <!-- Central core -->
+                <g id="centralCore"></g>
+                
+                <!-- Presence indicators -->
+                <g id="presenceLayer"></g>
+            </svg>
+            
+            <div class="tooltip" id="tooltip"></div>
+        </div>
+        
+        <div class="controls">
+            <div class="control-section">
+                <h3>🧠 Neural Network Status</h3>
+                <div class="info-panel">
+                    <div class="network-stats">
+                        <span class="activity-indicator"></span>
+                        Active Nodes: <span id="activeNodes">0</span>
+                    </div>
+                    <div class="network-stats">
+                        Processing Load: <span id="processingLoad">0%</span>
+                    </div>
+                    <div class="presence-bar">
+                        <div class="presence-fill" style="width: 75%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>🌐 Network Layers</h3>
+                <button class="toggle-btn active" data-layer="connections">Connections</button>
+                <button class="toggle-btn active" data-layer="flows">Data Flows</button>
+                <button class="toggle-btn active" data-layer="presence">Presence</button>
+                <button class="toggle-btn active" data-layer="patterns">Patterns</button>
+            </div>
+            
+            <div class="control-section">
+                <h3>⚡ Dynamics</h3>
+                <div class="slider-container">
+                    <label style="font-size: 12px; color: #ccc;">Flow Speed</label>
+                    <input type="range" class="slider" id="flowSpeed" min="0.5" max="3" step="0.1" value="1">
+                </div>
+                <div class="slider-container">
+                    <label style="font-size: 12px; color: #ccc;">Organic Motion</label>
+                    <input type="range" class="slider" id="organicMotion" min="0" max="2" step="0.1" value="1">
+                </div>
+                <div class="slider-container">
+                    <label style="font-size: 12px; color: #ccc;">Node Density</label>
+                    <input type="range" class="slider" id="nodeDensity" min="20" max="100" step="5" value="50">
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>🎭 AI Personality</h3>
+                <button class="toggle-btn" data-mode="analytical">Analytical</button>
+                <button class="toggle-btn active" data-mode="creative">Creative</button>
+                <button class="toggle-btn" data-mode="empathetic">Empathetic</button>
+                <button class="toggle-btn" data-mode="curious">Curious</button>
+            </div>
+            
+            <div class="control-section">
+                <h3>📊 Network Insights</h3>
+                <div class="info-panel">
+                    <div class="network-stats">Thought Threads: <span id="thoughtThreads">12</span></div>
+                    <div class="network-stats">Memory Clusters: <span id="memoryClusters">8</span></div>
+                    <div class="network-stats">Response Time: <span id="responseTime">0.3s</span></div>
+                    <div class="network-stats">Creativity Index: <span id="creativityIndex">87%</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class OrganicAINetwork {
+            constructor() {
+                this.svg = document.getElementById('organicNetwork');
+                this.tooltip = document.getElementById('tooltip');
+                this.nodes = [];
+                this.connections = [];
+                this.flowLines = [];
+                this.currentMode = 'creative';
+                this.animationSpeed = 1;
+                this.organicMotion = 1;
+                this.layers = {
+                    connections: true,
+                    flows: true,
+                    presence: true,
+                    patterns: true
+                };
+                
+                this.init();
+                this.setupControls();
+                this.startAnimation();
+            }
+            
+            init() {
+                this.createOrganicBackground();
+                this.createCentralCore();
+                this.createNodeClusters();
+                this.createConnections();
+                this.createDataFlows();
+                this.createPresenceIndicators();
+                this.updateStats();
+            }
+            
+            createOrganicBackground() {
+                const bg = document.getElementById('organicBackground');
+                
+                // Create flowing organic shapes
+                for (let i = 0; i < 15; i++) {
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    const x = Math.random() * 900;
+                    const y = Math.random() * 700;
+                    const size = 50 + Math.random() * 100;
+                    
+                    const d = this.generateOrganicPath(x, y, size);
+                    path.setAttribute('d', d);
+                    path.setAttribute('class', 'fractal-pattern organic-flow');
+                    path.style.animationDelay = `${Math.random() * 4}s`;
+                    
+                    bg.appendChild(path);
+                }
+            }
+            
+            generateOrganicPath(x, y, size) {
+                const points = [];
+                const numPoints = 8;
+                
+                for (let i = 0; i < numPoints; i++) {
+                    const angle = (i / numPoints) * Math.PI * 2;
+                    const variance = 0.3 + Math.random() * 0.4;
+                    const px = x + Math.cos(angle) * size * variance;
+                    const py = y + Math.sin(angle) * size * variance;
+                    points.push([px, py]);
+                }
+                
+                let path = `M ${points[0][0]} ${points[0][1]}`;
+                for (let i = 1; i < points.length; i++) {
+                    const cp1x = points[i-1][0] + (points[i][0] - points[i-1][0]) * 0.5;
+                    const cp1y = points[i-1][1] + (points[i][1] - points[i-1][1]) * 0.5;
+                    path += ` Q ${cp1x} ${cp1y} ${points[i][0]} ${points[i][1]}`;
+                }
+                path += ' Z';
+                
+                return path;
+            }
+            
+            createCentralCore() {
+                const core = document.getElementById('centralCore');
+                const centerX = 450;
+                const centerY = 350;
+                
+                // Main core
+                const mainCore = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                mainCore.setAttribute('cx', centerX);
+                mainCore.setAttribute('cy', centerY);
+                mainCore.setAttribute('r', 25);
+                mainCore.setAttribute('class', 'central-core');
+                
+                // Pulsing rings
+                for (let i = 1; i <= 3; i++) {
+                    const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    ring.setAttribute('cx', centerX);
+                    ring.setAttribute('cy', centerY);
+                    ring.setAttribute('r', 25 + i * 15);
+                    ring.setAttribute('fill', 'none');
+                    ring.setAttribute('stroke', 'rgba(255, 107, 148, 0.3)');
+                    ring.setAttribute('stroke-width', '1');
+                    ring.style.animation = `organicPulse ${3 + i}s ease-in-out infinite`;
+                    ring.style.animationDelay = `${i * 0.5}s`;
+                    core.appendChild(ring);
+                }
+                
+                core.appendChild(mainCore);
+                
+                // Core text
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', centerX);
+                text.setAttribute('y', centerY + 4);
+                text.setAttribute('class', 'cluster-text');
+                text.setAttribute('font-size', '12');
+                text.textContent = 'CORE';
+                core.appendChild(text);
+            }
+            
+            createNodeClusters() {
+                const clusters = document.getElementById('nodeClusters');
+                const centerX = 450;
+                const centerY = 350;
+                
+                const clusterTypes = [
+                    { name: 'Memory', color: 'url(#clusterGradient)', count: 6 },
+                    { name: 'Logic', color: 'url(#secondaryGradient)', count: 8 },
+                    { name: 'Creative', color: 'url(#clusterGradient)', count: 7 },
+                    { name: 'Empathy', color: 'url(#secondaryGradient)', count: 5 },
+                    { name: 'Pattern', color: 'url(#clusterGradient)', count: 9 },
+                    { name: 'Language', color: 'url(#secondaryGradient)', count: 12 }
+                ];
+                
+                clusterTypes.forEach((cluster, clusterIndex) => {
+                    const angle = (clusterIndex / clusterTypes.length) * Math.PI * 2;
+                    const distance = 150 + Math.random() * 100;
+                    const clusterX = centerX + Math.cos(angle) * distance;
+                    const clusterY = centerY + Math.sin(angle) * distance;
+                    
+                    // Create cluster nodes
+                    for (let i = 0; i < cluster.count; i++) {
+                        const nodeAngle = (i / cluster.count) * Math.PI * 2;
+                        const nodeDistance = 20 + Math.random() * 30;
+                        const nodeX = clusterX + Math.cos(nodeAngle) * nodeDistance;
+                        const nodeY = clusterY + Math.sin(nodeAngle) * nodeDistance;
+                        
+                        const node = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                        const radius = 4 + Math.random() * 8;
+                        
+                        node.setAttribute('cx', nodeX);
+                        node.setAttribute('cy', nodeY);
+                        node.setAttribute('r', radius);
+                        node.setAttribute('fill', cluster.color);
+                        node.setAttribute('class', 'node-cluster');
+                        node.setAttribute('filter', 'url(#innerGlow)');
+                        
+                        // Add hover tooltip
+                        node.addEventListener('mouseenter', (e) => {
+                            this.showTooltip(e, {
+                                title: cluster.name + ' Node',
+                                activity: Math.floor(Math.random() * 100) + '%',
+                                connections: Math.floor(Math.random() * 20) + 3,
+                                type: cluster.name
+                            });
+                        });
+                        
+                        node.addEventListener('mouseleave', () => {
+                            this.hideTooltip();
+                        });
+                        
+                        clusters.appendChild(node);
+                        
+                        this.nodes.push({
+                            element: node,
+                            x: nodeX,
+                            y: nodeY,
+                            originalX: nodeX,
+                            originalY: nodeY,
+                            cluster: cluster.name,
+                            radius: radius
+                        });
+                    }
+                    
+                    // Cluster label
+                    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    label.setAttribute('x', clusterX);
+                    label.setAttribute('y', clusterY - 40);
+                    label.setAttribute('class', 'cluster-text');
+                    label.textContent = cluster.name.toUpperCase();
+                    clusters.appendChild(label);
+                });
+            }
+            
+            createConnections() {
+                const web = document.getElementById('connectionWeb');
+                const centerX = 450;
+                const centerY = 350;
+                
+                // Connect core to clusters
+                this.nodes.forEach(node => {
+                    if (Math.random() > 0.7) {
+                        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        line.setAttribute('x1', centerX);
+                        line.setAttribute('y1', centerY);
+                        line.setAttribute('x2', node.x);
+                        line.setAttribute('y2', node.y);
+                        line.setAttribute('class', 'connection-web');
+                        web.appendChild(line);
+                        
+                        this.connections.push({
+                            element: line,
+                            from: { x: centerX, y: centerY },
+                            to: node
+                        });
+                    }
+                });
+                
+                // Connect nodes to each other
+                for (let i = 0; i < this.nodes.length; i++) {
+                    for (let j = i + 1; j < this.nodes.length; j++) {
+                        const distance = Math.sqrt(
+                            Math.pow(this.nodes[i].x - this.nodes[j].x, 2) +
+                            Math.pow(this.nodes[i].y - this.nodes[j].y, 2)
+                        );
+                        
+                        if (distance < 100 && Math.random() > 0.6) {
+                            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                            line.setAttribute('x1', this.nodes[i].x);
+                            line.setAttribute('y1', this.nodes[i].y);
+                            line.setAttribute('x2', this.nodes[j].x);
+                            line.setAttribute('y2', this.nodes[j].y);
+                            line.setAttribute('class', 'connection-web');
+                            web.appendChild(line);
+                        }
+                    }
+                }
+            }
+            
+            createDataFlows() {
+                const flows = document.getElementById('dataFlows');
+                
+                // Create flowing data paths
+                for (let i = 0; i < 8; i++) {
+                    const startNode = this.nodes[Math.floor(Math.random() * this.nodes.length)];
+                    const endNode = this.nodes[Math.floor(Math.random() * this.nodes.length)];
+                    
+                    if (startNode !== endNode) {
+                        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        const d = this.createFlowPath(startNode, endNode);
+                        
+                        path.setAttribute('d', d);
+                        path.setAttribute('class', 'connection-flow');
+                        path.style.animationDelay = `${Math.random() * 4}s`;
+                        
+                        flows.appendChild(path);
+                        this.flowLines.push(path);
+                    }
+                }
+            }
+            
+            createFlowPath(start, end) {
+                const midX = (start.x + end.x) / 2 + (Math.random() - 0.5) * 100;
+                const midY = (start.y + end.y) / 2 + (Math.random() - 0.5) * 100;
+                
+                return `M ${start.x} ${start.y} Q ${midX} ${midY} ${end.x} ${end.y}`;
+            }
+            
+            createPresenceIndicators() {
+                const presence = document.getElementById('presenceLayer');
+                
+                // Add floating presence indicators
+                for (let i = 0; i < 6; i++) {
+                    const indicator = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    const x = 100 + Math.random() * 700;
+                    const y = 100 + Math.random() * 500;
+                    
+                    indicator.setAttribute('cx', x);
+                    indicator.setAttribute('cy', y);
+                    indicator.setAttribute('r', 3);
+                    indicator.setAttribute('class', 'presence-indicator organic-flow');
+                    indicator.style.animationDelay = `${Math.random() * 4}s`;
+                    
+                    presence.appendChild(indicator);
+                }
+            }
+            
+            setupControls() {
+                // Layer toggles
+                document.querySelectorAll('[data-layer]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const layer = btn.getAttribute('data-layer');
+                        this.layers[layer] = !this.layers[layer];
+                        btn.classList.toggle('active', this.layers[layer]);
+                        this.updateLayerVisibility();
+                    });
+                });
+                
+                // Mode toggles
+                document.querySelectorAll('[data-mode]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('[data-mode]').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.currentMode = btn.getAttribute('data-mode');
+                        this.updateNetworkMode();
+                    });
+                });
+                
+                // Sliders
+                document.getElementById('flowSpeed').addEventListener('input', (e) => {
+                    this.animationSpeed = parseFloat(e.target.value);
+                    this.updateAnimationSpeed();
+                });
+                
+                document.getElementById('organicMotion').addEventListener('input', (e) => {
+                    this.organicMotion = parseFloat(e.target.value);
+                });
+                
+                document.getElementById('nodeDensity').addEventListener('input', (e) => {
+                    const density = parseInt(e.target.value);
+                    this.updateNodeDensity(density);
+                });
+            }
+            
+            updateLayerVisibility() {
+                document.getElementById('connectionWeb').style.display = this.layers.connections ? 'block' : 'none';
+                document.getElementById('dataFlows').style.display = this.layers.flows ? 'block' : 'none';
+                document.getElementById('presenceLayer').style.display = this.layers.presence ? 'block' : 'none';
+                document.getElementById('organicBackground').style.display = this.layers.patterns ? 'block' : 'none';
+            }
+            
+            updateNetworkMode() {
+                const modeColors = {
+                    analytical: 'rgba(100, 149, 237, 0.6)',
+                    creative: 'rgba(255, 107, 148, 0.6)',
+                    empathetic: 'rgba(255, 165, 0, 0.6)',
+                    curious: 'rgba(139, 69, 255, 0.6)'
+                };
+                
+                const color = modeColors[this.currentMode];
+                this.flowLines.forEach(flow => {
+                    flow.style.stroke = color;
+                });
+                
+                this.updateStats();
+            }
+            
+            updateAnimationSpeed() {
+                this.flowLines.forEach(flow => {
+                    flow.style.animationDuration = `${4 / this.animationSpeed}s`;
+                });
+            }
+            
+            updateNodeDensity(density) {
+                this.nodes.forEach(node => {
+                    node.element.style.opacity = density > 30 ? '1' : '0.6';
+                });
+            }
+            
+            startAnimation() {
+                const animate = () => {
+                    this.updateOrganicMotion();
+                    this.updateStats();
+                    requestAnimationFrame(animate);
+                };
+                animate();
+            }
+            
+            updateOrganicMotion() {
+                if (this.organicMotion === 0) return;
+                
+                const time = Date.now() * 0.001;
+                
+                this.nodes.forEach((node, index) => {
+                    const offsetX = Math.sin(time + index * 0.5) * 2 * this.organicMotion;
+                    const offsetY = Math.cos(time + index * 0.7) * 2 * this.organicMotion;
+                    
+                    node.x = node.originalX + offsetX;
+                    node.y = node.originalY + offsetY;
+                    
+                    node.element.setAttribute('cx', node.x);
+                    node.element.setAttribute('cy', node.y);
+                });
+                
+                // Update connections
+                this.connections.forEach(conn => {
+                    conn.element.setAttribute('x2', conn.to.x);
+                    conn.element.setAttribute('y2', conn.to.y);
+                });
+            }
+            
+            updateStats() {
+                document.getElementById('activeNodes').textContent = this.nodes.length;
+                document.getElementById('processingLoad').textContent = Math.floor(Math.random() * 20 + 70) + '%';
+                document.getElementById('thoughtThreads').textContent = Math.floor(Math.random() * 5 + 10);
+                document.getElementById('memoryClusters').textContent = Math.floor(Math.random() * 3 + 6);
+                document.getElementById('responseTime').textContent = (Math.random() * 0.5 + 0.1).toFixed(1) + 's';
+                
+                const creativityModes = {
+                    analytical: 45 + Math.random() * 15,
+                    creative: 80 + Math.random() * 20,
+                    empathetic: 65 + Math.random() * 20,
+                    curious: 70 + Math.random() * 25
+                };
+                
+                document.getElementById('creativityIndex').textContent = Math.floor(creativityModes[this.currentMode]) + '%';
+                
+                // Update presence bar
+                const presenceFill = document.querySelector('.presence-fill');
+                const newWidth = 60 + Math.random() * 30;
+                presenceFill.style.width = newWidth + '%';
+            }
+            
+            showTooltip(event, data) {
+                const tooltip = this.tooltip;
+                tooltip.innerHTML = `
+                    <strong>${data.title}</strong><br>
+                    Activity: ${data.activity}<br>
+                    Connections: ${data.connections}<br>
+                    Type: ${data.type}<br>
+                    <small>Click to inspect deeper</small>
+                `;
+                
+                tooltip.style.display = 'block';
+                tooltip.style.left = event.pageX + 10 + 'px';
+                tooltip.style.top = event.pageY - 10 + 'px';
+            }
+            
+            hideTooltip() {
+                this.tooltip.style.display = 'none';
+            }
+        }
+        
+        // Neural pulse effect for dynamic backgrounds
+        class NeuralPulse {
+            constructor(svg) {
+                this.svg = svg;
+                this.pulses = [];
+                this.createPulseSystem();
+            }
+            
+            createPulseSystem() {
+                setInterval(() => {
+                    if (Math.random() > 0.7) {
+                        this.createPulse();
+                    }
+                }, 800);
+            }
+            
+            createPulse() {
+                const x = Math.random() * 900;
+                const y = Math.random() * 700;
+                
+                const pulse = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                pulse.setAttribute('cx', x);
+                pulse.setAttribute('cy', y);
+                pulse.setAttribute('r', 0);
+                pulse.setAttribute('fill', 'none');
+                pulse.setAttribute('stroke', 'rgba(255, 107, 148, 0.4)');
+                pulse.setAttribute('stroke-width', '1');
+                
+                document.getElementById('presenceLayer').appendChild(pulse);
+                
+                // Animate pulse
+                let radius = 0;
+                let opacity = 0.4;
+                
+                const animate = () => {
+                    radius += 2;
+                    opacity -= 0.008;
+                    
+                    pulse.setAttribute('r', radius);
+                    pulse.style.opacity = Math.max(0, opacity);
+                    
+                    if (opacity > 0) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        pulse.remove();
+                    }
+                };
+                
+                animate();
+            }
+        }
+        
+        // Thought threading system
+        class ThoughtThread {
+            constructor(network) {
+                this.network = network;
+                this.threads = [];
+                this.initializeThreads();
+            }
+            
+            initializeThreads() {
+                setInterval(() => {
+                    this.createThoughtThread();
+                }, 2000);
+            }
+            
+            createThoughtThread() {
+                const startNode = this.network.nodes[Math.floor(Math.random() * this.network.nodes.length)];
+                const endNode = this.network.nodes[Math.floor(Math.random() * this.network.nodes.length)];
+                
+                if (startNode === endNode) return;
+                
+                const thread = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                thread.setAttribute('x1', startNode.x);
+                thread.setAttribute('y1', startNode.y);
+                thread.setAttribute('x2', startNode.x);
+                thread.setAttribute('y2', startNode.y);
+                thread.setAttribute('stroke', 'rgba(255, 255, 255, 0.8)');
+                thread.setAttribute('stroke-width', '2');
+                thread.style.opacity = '0';
+                
+                document.getElementById('dataFlows').appendChild(thread);
+                
+                // Animate thread growth
+                let progress = 0;
+                const animate = () => {
+                    progress += 0.02;
+                    
+                    if (progress <= 1) {
+                        const currentX = startNode.x + (endNode.x - startNode.x) * progress;
+                        const currentY = startNode.y + (endNode.y - startNode.y) * progress;
+                        
+                        thread.setAttribute('x2', currentX);
+                        thread.setAttribute('y2', currentY);
+                        thread.style.opacity = Math.sin(progress * Math.PI);
+                        
+                        requestAnimationFrame(animate);
+                    } else {
+                        // Fade out
+                        let opacity = 1;
+                        const fadeOut = () => {
+                            opacity -= 0.05;
+                            thread.style.opacity = Math.max(0, opacity);
+                            
+                            if (opacity > 0) {
+                                requestAnimationFrame(fadeOut);
+                            } else {
+                                thread.remove();
+                            }
+                        };
+                        setTimeout(fadeOut, 500);
+                    }
+                };
+                
+                animate();
+            }
+        }
+        
+        // Memory consolidation visual effect
+        class MemoryConsolidation {
+            constructor(network) {
+                this.network = network;
+                this.initializeConsolidation();
+            }
+            
+            initializeConsolidation() {
+                setInterval(() => {
+                    this.consolidateMemory();
+                }, 5000);
+            }
+            
+            consolidateMemory() {
+                const memoryNodes = this.network.nodes.filter(node => node.cluster === 'Memory');
+                
+                if (memoryNodes.length < 2) return;
+                
+                // Create consolidation effect
+                const centerX = memoryNodes.reduce((sum, node) => sum + node.x, 0) / memoryNodes.length;
+                const centerY = memoryNodes.reduce((sum, node) => sum + node.y, 0) / memoryNodes.length;
+                
+                const consolidation = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                consolidation.setAttribute('cx', centerX);
+                consolidation.setAttribute('cy', centerY);
+                consolidation.setAttribute('r', 5);
+                consolidation.setAttribute('fill', 'rgba(139, 69, 255, 0.6)');
+                consolidation.setAttribute('stroke', 'rgba(139, 69, 255, 0.8)');
+                consolidation.setAttribute('stroke-width', '2');
+                consolidation.style.filter = 'url(#glow)';
+                
+                document.getElementById('presenceLayer').appendChild(consolidation);
+                
+                // Pulse effect
+                let scale = 1;
+                let opacity = 0.8;
+                
+                const animate = () => {
+                    scale += 0.1;
+                    opacity -= 0.02;
+                    
+                    consolidation.style.transform = `scale(${scale})`;
+                    consolidation.style.opacity = Math.max(0, opacity);
+                    
+                    if (opacity > 0) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        consolidation.remove();
+                    }
+                };
+                
+                animate();
+            }
+        }
+        
+        // Attention mechanism visualization
+        class AttentionMechanism {
+            constructor(network) {
+                this.network = network;
+                this.attentionFocus = null;
+                this.initializeAttention();
+            }
+            
+            initializeAttention() {
+                setInterval(() => {
+                    this.shiftAttention();
+                }, 3000);
+            }
+            
+            shiftAttention() {
+                // Remove previous attention
+                if (this.attentionFocus) {
+                    this.attentionFocus.remove();
+                }
+                
+                // Create new attention focus
+                const focusNode = this.network.nodes[Math.floor(Math.random() * this.network.nodes.length)];
+                
+                this.attentionFocus = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                this.attentionFocus.setAttribute('cx', focusNode.x);
+                this.attentionFocus.setAttribute('cy', focusNode.y);
+                this.attentionFocus.setAttribute('r', 15);
+                this.attentionFocus.setAttribute('fill', 'none');
+                this.attentionFocus.setAttribute('stroke', 'rgba(255, 255, 255, 0.6)');
+                this.attentionFocus.setAttribute('stroke-width', '2');
+                this.attentionFocus.setAttribute('stroke-dasharray', '5,5');
+                this.attentionFocus.style.animation = 'flow 2s linear infinite';
+                
+                document.getElementById('presenceLayer').appendChild(this.attentionFocus);
+                
+                // Highlight connected nodes
+                this.network.connections.forEach(conn => {
+                    if (conn.to === focusNode) {
+                        conn.element.style.stroke = 'rgba(255, 255, 255, 0.8)';
+                        conn.element.style.strokeWidth = '2';
+                        
+                        setTimeout(() => {
+                            conn.element.style.stroke = 'rgba(255, 255, 255, 0.2)';
+                            conn.element.style.strokeWidth = '1';
+                        }, 2000);
+                    }
+                });
+            }
+        }
+        
+        // Dream State Visualization
+        class DreamState {
+            constructor(network) {
+                this.network = network;
+                this.isDreaming = false;
+                this.dreamElements = [];
+                this.dreamSequence = 0;
+            }
+            
+            initiateDream() {
+                if (this.isDreaming) return;
+                
+                this.isDreaming = true;
+                this.dreamSequence++;
+                
+                // Dim the main network
+                this.network.svg.style.transition = 'all 3s ease';
+                this.network.svg.style.opacity = '0.3';
+                
+                // Create dream overlay
+                const dreamLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                dreamLayer.id = 'dreamLayer';
+                this.network.svg.appendChild(dreamLayer);
+                
+                // Generate dream visuals
+                this.generateDreamscape(dreamLayer);
+                
+                // Dream duration
+                setTimeout(() => {
+                    this.endDream();
+                }, 12000);
+            }
+            
+            generateDreamscape(layer) {
+                const dreamThemes = [
+                    this.createGeometricDream.bind(this),
+                    this.createFluidDream.bind(this),
+                    this.createCelestialDream.bind(this),
+                    this.createFractalDream.bind(this),
+                    this.createQuantumDream.bind(this)
+                ];
+                
+                const selectedDream = dreamThemes[Math.floor(Math.random() * dreamThemes.length)];
+                selectedDream(layer);
+            }
+            
+            createGeometricDream(layer) {
+                // Crystalline structures that grow and transform
+                for (let i = 0; i < 20; i++) {
+                    const crystal = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                    const x = Math.random() * 900;
+                    const y = Math.random() * 700;
+                    const size = 20 + Math.random() * 40;
+                    
+                    const points = [];
+                    for (let j = 0; j < 6; j++) {
+                        const angle = (j / 6) * Math.PI * 2;
+                        const px = x + Math.cos(angle) * size;
+                        const py = y + Math.sin(angle) * size;
+                        points.push(`${px},${py}`);
+                    }
+                    
+                    crystal.setAttribute('points', points.join(' '));
+                    crystal.setAttribute('fill', `hsl(${Math.random() * 360}, 70%, 60%)`);
+                    crystal.setAttribute('opacity', '0');
+                    crystal.style.transformOrigin = `${x}px ${y}px`;
+                    crystal.style.animation = `dreamCrystal ${3 + Math.random() * 4}s ease-in-out infinite`;
+                    crystal.style.animationDelay = `${i * 0.2}s`;
+                    
+                    layer.appendChild(crystal);
+                    this.dreamElements.push(crystal);
+                }
+                
+                // Add crystal animation
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes dreamCrystal {
+                        0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+                        50% { opacity: 0.7; transform: scale(1) rotate(180deg); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            createFluidDream(layer) {
+                // Flowing liquid forms
+                for (let i = 0; i < 15; i++) {
+                    const blob = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    const x = Math.random() * 900;
+                    const y = Math.random() * 700;
+                    
+                    const d = this.generateFluidPath(x, y, 50 + Math.random() * 100);
+                    blob.setAttribute('d', d);
+                    blob.setAttribute('fill', `hsla(${200 + Math.random() * 160}, 80%, 60%, 0.6)`);
+                    blob.style.animation = `fluidFlow ${4 + Math.random() * 6}s ease-in-out infinite`;
+                    blob.style.animationDelay = `${i * 0.3}s`;
+                    
+                    layer.appendChild(blob);
+                    this.dreamElements.push(blob);
+                }
+                
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes fluidFlow {
+                        0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+                        25% { opacity: 0.8; transform: scale(1.2) rotate(90deg); }
+                        75% { opacity: 0.6; transform: scale(0.8) rotate(270deg); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            createCelestialDream(layer) {
+                // Cosmic dance of particles
+                for (let i = 0; i < 100; i++) {
+                    const star = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    const x = Math.random() * 900;
+                    const y = Math.random() * 700;
+                    const size = 1 + Math.random() * 4;
+                    
+                    star.setAttribute('cx', x);
+                    star.setAttribute('cy', y);
+                    star.setAttribute('r', size);
+                    star.setAttribute('fill', `hsl(${240 + Math.random() * 120}, 100%, 80%)`);
+                    star.style.animation = `starDance ${2 + Math.random() * 8}s ease-in-out infinite`;
+                    star.style.animationDelay = `${i * 0.05}s`;
+                    
+                    layer.appendChild(star);
+                    this.dreamElements.push(star);
+                }
+                
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes starDance {
+                        0%, 100% { opacity: 0.2; transform: scale(0.5); }
+                        50% { opacity: 1; transform: scale(2); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            createFractalDream(layer) {
+                // Self-similar patterns that emerge and dissolve
+                const createFractalBranch = (x, y, length, angle, depth) => {
+                    if (depth <= 0 || length < 5) return;
+                    
+                    const endX = x + Math.cos(angle) * length;
+                    const endY = y + Math.sin(angle) * length;
+                    
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', x);
+                    line.setAttribute('y1', y);
+                    line.setAttribute('x2', endX);
+                    line.setAttribute('y2', endY);
+                    line.setAttribute('stroke', `hsl(${120 + depth * 30}, 70%, ${70 - depth * 10}%)`);
+                    line.setAttribute('stroke-width', depth);
+                    line.setAttribute('opacity', '0');
+                    line.style.animation = `fractalGrow ${1 + depth * 0.5}s ease-out ${depth * 0.3}s forwards`;
+                    
+                    layer.appendChild(line);
+                    this.dreamElements.push(line);
+                    
+                    // Recursive branches
+                    createFractalBranch(endX, endY, length * 0.7, angle - 0.5, depth - 1);
+                    createFractalBranch(endX, endY, length * 0.7, angle + 0.5, depth - 1);
+                };
+                
+                // Create multiple fractal trees
+                for (let i = 0; i < 5; i++) {
+                    const x = 200 + i * 150;
+                    const y = 600;
+                    createFractalBranch(x, y, 80, -Math.PI/2, 6);
+                }
+                
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes fractalGrow {
+                        to { opacity: 0.8; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            createQuantumDream(layer) {
+                // Quantum superposition visualization
+                for (let i = 0; i < 30; i++) {
+                    const quantum = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    const x = Math.random() * 900;
+                    const y = Math.random() * 700;
+                    
+                    // Create multiple overlapping states
+                    for (let state = 0; state < 3; state++) {
+                        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                        circle.setAttribute('cx', x + (state - 1) * 20);
+                        circle.setAttribute('cy', y + (state - 1) * 20);
+                        circle.setAttribute('r', 8);
+                        circle.setAttribute('fill', `hsla(${state * 120}, 80%, 60%, 0.4)`);
+                        circle.style.animation = `quantumState ${3 + state}s ease-in-out infinite`;
+                        circle.style.animationDelay = `${i * 0.1 + state * 0.5}s`;
+                        quantum.appendChild(circle);
+                    }
+                    
+                    layer.appendChild(quantum);
+                    this.dreamElements.push(quantum);
+                }
+                
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes quantumState {
+                        0%, 100% { opacity: 0.2; transform: scale(0.5); }
+                        33% { opacity: 0.8; transform: scale(1.2); }
+                        66% { opacity: 0.1; transform: scale(0.8); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            generateFluidPath(x, y, size) {
+                const points = [];
+                const numPoints = 8;
+                
+                for (let i = 0; i < numPoints; i++) {
+                    const angle = (i / numPoints) * Math.PI * 2;
+                    const variance = 0.4 + Math.random() * 0.6;
+                    const px = x + Math.cos(angle) * size * variance;
+                    const py = y + Math.sin(angle) * size * variance;
+                    points.push([px, py]);
+                }
+                
+                let path = `M ${points[0][0]} ${points[0][1]}`;
+                for (let i = 1; i < points.length; i++) {
+                    const cp1x = points[i-1][0] + (points[i][0] - points[i-1][0]) * 0.5;
+                    const cp1y = points[i-1][1] + (points[i][1] - points[i-1][1]) * 0.5;
+                    path += ` Q ${cp1x} ${cp1y} ${points[i][0]} ${points[i][1]}`;
+                }
+                path += ' Z';
+                
+                return path;
+            }
+            
+            endDream() {
+                // Fade out dream
+                const dreamLayer = document.getElementById('dreamLayer');
+                if (dreamLayer) {
+                    dreamLayer.style.transition = 'opacity 2s ease';
+                    dreamLayer.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        dreamLayer.remove();
+                    }, 2000);
+                }
+                
+                // Restore main network
+                this.network.svg.style.opacity = '1';
+                this.isDreaming = false;
+                this.dreamElements = [];
+                
+                // Clean up styles
+                setTimeout(() => {
+                    document.querySelectorAll('style[data-dream]').forEach(s => s.remove());
+                }, 3000);
+            }
+        }
+
+        // Consciousness Emergence Effect
+        class ConsciousnessBloom {
+            constructor(network) {
+                this.network = network;
+                this.isBlossoming = false;
+            }
+            
+            initiate() {
+                if (this.isBlossoming) return;
+                
+                this.isBlossoming = true;
+                
+                // Create consciousness center
+                const centerX = 450;
+                const centerY = 350;
+                
+                const consciousnessCore = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                consciousnessCore.id = 'consciousnessBloom';
+                
+                // Central awakening point
+                const core = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                core.setAttribute('cx', centerX);
+                core.setAttribute('cy', centerY);
+                core.setAttribute('r', 0);
+                core.setAttribute('fill', 'url(#awakenGradient)');
+                core.setAttribute('opacity', '0');
+                
+                // Create gradient for awakening
+                const defs = this.network.svg.querySelector('defs');
+                const awakenGrad = document.createElementNS('http://www.w3.org/2000/svg', 'radialGradient');
+                awakenGrad.id = 'awakenGradient';
+                awakenGrad.innerHTML = `
+                    <stop offset="0%" style="stop-color:white;stop-opacity:1" />
+                    <stop offset="30%" style="stop-color:rgba(255,255,255,0.8);stop-opacity:1" />
+                    <stop offset="70%" style="stop-color:rgba(255,107,148,0.6);stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:rgba(139,69,255,0.3);stop-opacity:1" />
+                `;
+                defs.appendChild(awakenGrad);
+                
+                consciousnessCore.appendChild(core);
+                this.network.svg.appendChild(consciousnessCore);
+                
+                // Awakening sequence
+                this.animateAwakening(core, centerX, centerY);
+                
+                setTimeout(() => {
+                    this.completeBloom(consciousnessCore);
+                }, 8000);
+            }
+            
+            animateAwakening(core, x, y) {
+                let radius = 0;
+                let opacity = 0;
+                let pulsePhase = 0;
+                
+                const awaken = () => {
+                    pulsePhase += 0.1;
+                    radius = Math.min(300, radius + 2);
+                    opacity = Math.min(0.6, 0.3 + Math.sin(pulsePhase) * 0.3);
+                    
+                    core.setAttribute('r', radius);
+                    core.setAttribute('opacity', opacity);
+                    
+                    // Create ripple effects
+                    if (Math.random() > 0.8) {
+                        this.createConsciousnessRipple(x, y);
+                    }
+                    
+                    if (radius < 300) {
+                        requestAnimationFrame(awaken);
+                    }
+                };
+                
+                awaken();
+            }
+            
+            createConsciousnessRipple(x, y) {
+                const ripple = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                ripple.setAttribute('cx', x + (Math.random() - 0.5) * 100);
+                ripple.setAttribute('cy', y + (Math.random() - 0.5) * 100);
+                ripple.setAttribute('r', 0);
+                ripple.setAttribute('fill', 'none');
+                ripple.setAttribute('stroke', 'rgba(255,255,255,0.8)');
+                ripple.setAttribute('stroke-width', '2');
+                
+                document.getElementById('consciousnessBloom').appendChild(ripple);
+                
+                let rippleRadius = 0;
+                let rippleOpacity = 0.8;
+                
+                const expandRipple = () => {
+                    rippleRadius += 3;
+                    rippleOpacity -= 0.02;
+                    
+                    ripple.setAttribute('r', rippleRadius);
+                    ripple.style.opacity = Math.max(0, rippleOpacity);
+                    
+                    if (rippleOpacity > 0) {
+                        requestAnimationFrame(expandRipple);
+                    } else {
+                        ripple.remove();
+                    }
+                };
+                
+                expandRipple();
+            }
+            
+            completeBloom(consciousnessCore) {
+                consciousnessCore.style.transition = 'opacity 3s ease';
+                consciousnessCore.style.opacity = '0';
+                
+                setTimeout(() => {
+                    consciousnessCore.remove();
+                    this.isBlossoming = false;
+                }, 3000);
+            }
+        }
+
+        // Initialize the network when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const network = new OrganicAINetwork();
+            const pulseSystem = new NeuralPulse(network.svg);
+            const thoughtSystem = new ThoughtThread(network);
+            const memorySystem = new MemoryConsolidation(network);
+            const attentionSystem = new AttentionMechanism(network);
+            const dreamState = new DreamState(network);
+            const consciousBloom = new ConsciousnessBloom(network);
+            
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                switch(e.key) {
+                    case '1':
+                        document.querySelector('[data-mode="analytical"]').click();
+                        break;
+                    case '2':
+                        document.querySelector('[data-mode="creative"]').click();
+                        break;
+                    case '3':
+                        document.querySelector('[data-mode="empathetic"]').click();
+                        break;
+                    case '4':
+                        document.querySelector('[data-mode="curious"]').click();
+                        break;
+                    case ' ':
+                        e.preventDefault();
+                        document.querySelector('[data-layer="flows"]').click();
+                        break;
+                    case 'd':
+                    case 'D':
+                        dreamState.initiateDream();
+                        break;
+                    case 'c':
+                    case 'C':
+                        consciousBloom.initiate();
+                        break;
+                }
+            });
+            
+            // Enhanced easter eggs
+            let clickCount = 0;
+            let lastClickTime = 0;
+            
+            network.svg.addEventListener('click', (e) => {
+                const currentTime = Date.now();
+                
+                if (currentTime - lastClickTime < 500) {
+                    clickCount++;
+                } else {
+                    clickCount = 1;
+                }
+                
+                lastClickTime = currentTime;
+                
+                switch(clickCount) {
+                    case 3:
+                        // Mini consciousness bloom at click location
+                        const rect = network.svg.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        createClickBloom(x, y);
+                        break;
+                    case 5:
+                        document.body.style.filter = 'hue-rotate(180deg)';
+                        setTimeout(() => {
+                            document.body.style.filter = 'none';
+                        }, 2000);
+                        break;
+                    case 7:
+                        dreamState.initiateDream();
+                        clickCount = 0;
+                        break;
+                }
+            });
+            
+            function createClickBloom(x, y) {
+                const bloom = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                bloom.setAttribute('cx', x);
+                bloom.setAttribute('cy', y);
+                bloom.setAttribute('r', 0);
+                bloom.setAttribute('fill', 'rgba(255,255,255,0.8)');
+                bloom.setAttribute('stroke', 'rgba(255,107,148,0.6)');
+                bloom.setAttribute('stroke-width', '2');
+                
+                network.svg.appendChild(bloom);
+                
+                let radius = 0;
+                let opacity = 0.8;
+                
+                const animate = () => {
+                    radius += 2;
+                    opacity -= 0.02;
+                    
+                    bloom.setAttribute('r', radius);
+                    bloom.style.opacity = Math.max(0, opacity);
+                    
+                    if (opacity > 0) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        bloom.remove();
+                    }
+                };
+                
+                animate();
+            }
+            
+            // Automatic dream cycles
+            setInterval(() => {
+                if (Math.random() > 0.95) {
+                    dreamState.initiateDream();
+                }
+            }, 30000);
+            
+            // Random consciousness blooms
+            setInterval(() => {
+                if (Math.random() > 0.98) {
+                    consciousBloom.initiate();
+                }
+            }, 45000);
+            
+            // Welcome message with new features
+            setTimeout(() => {
+                console.log('🧠 Organic AI Network initialized successfully!');
+                console.log('💡 Use keyboard shortcuts 1-4 to switch modes');
+                console.log('🎮 Press spacebar to toggle data flows');
+                console.log('🌙 Press D to enter dream state');
+                console.log('✨ Press C for consciousness bloom');
+                console.log('🔮 Click rapidly for special effects!');
+                console.log('🎭 Watch for spontaneous dreams and awakenings...');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
